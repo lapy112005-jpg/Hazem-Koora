@@ -442,8 +442,8 @@ function normalizeMatch(raw) {
     awayScore: pick(raw, ["Away Score", "AwayScore", "away_score"], null),
     status: String(pick(raw, ["Status", "status"], "NS")).trim(),
     date: pick(raw, ["Match Date", "MatchDate", "match_date", "date"], ""),
-    homelogo: pick(raw, ["Home Logo", "HomeLogo", "home_logo", "homeLogo"], ""),
-    awaylogo: pick(raw, ["Away Logo", "AwayLogo", "away_logo", "awayLogo"], "")
+homeLogo: pick(raw, ["Home Logo", "HomeLogo", "home_logo", "homelogo", "homeLogo"], ""),
+    awayLogo: pick(raw, ["Away Logo", "AwayLogo", "away_logo", "awaylogo", "awayLogo"], "")
 
   };
 }
