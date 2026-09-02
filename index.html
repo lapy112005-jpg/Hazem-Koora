@@ -434,17 +434,16 @@ function pick(obj, keys, fallback) {
 
 function normalizeMatch(raw) {
   return {
-    id: String(pick(raw, ["Match ID", "MatchID", "match_id", "id"], cryptoRandomId())),
-    league: pick(raw, ["League", "league"], "دوري غير معروف"),
-    home: pick(raw, ["Home Team", "HomeTeam", "home_team", "home"], "فريق مضيف"),
-    away: pick(raw, ["Away Team", "AwayTeam", "away_team", "away"], "فريق ضيف"),
-    homeScore: pick(raw, ["Home Score", "HomeScore", "home_score"], null),
-    awayScore: pick(raw, ["Away Score", "AwayScore", "away_score"], null),
-    status: String(pick(raw, ["Status", "status"], "NS")).trim(),
-    date: pick(raw, ["Match Date", "MatchDate", "match_date", "date"], ""),
-    homeLogo: pick(raw, ["Home Logo", "HomeLogo", "home_logo", "homelogo", "homeLogo"], ""),
-    awayLogo: pick(raw, ["Away Logo", "AwayLogo", "away_logo", "awaylogo", "awayLogo"], "")
-
+    id: String(pick(raw, ["id", "Match ID", "match_id"], cryptoRandomId())),
+    league: pick(raw, ["league", "League"], "دوري غير معروف"),
+    home: pick(raw, ["homeTeam", "home", "Home Team", "HomeTeam"], "فريق مضيف"),
+    away: pick(raw, ["awayTeam", "away", "Away Team", "AwayTeam"], "فريق ضيف"),
+    homeScore: pick(raw, ["homeScore", "Home Score", "home_score"], null),
+    awayScore: pick(raw, ["awayScore", "Away Score", "away_score"], null),
+    status: String(pick(raw, ["status", "Status"], "NS")).trim(),
+    date: pick(raw, ["matchDate", "Match Date", "date"], ""),
+    homeLogo: pick(raw, ["homeLogo", "Home Logo", "homelogo"], ""),
+    awayLogo: pick(raw, ["awayLogo", "Away Logo", "awaylogo"], "")
   };
 }
 
