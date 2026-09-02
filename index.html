@@ -413,7 +413,7 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
 /* ============================================================
    CONFIG
    ============================================================ */
-const WEBHOOK_URL = "https://hazem-n8n-gomma.app.n8n.cloud/webhook/bb3907c5-f6c9-4f36-8acb-7e2bc20305e8";
+const WEBHOOK_URL = "https://hazem-n8n-gomma.app.n8n.cloud/webhook/e10df1cf-9fb5-4456-a561-3339ed5f85c2";
 const REFRESH_INTERVAL_MS = 30000; // 30s auto refresh
 
 let currentMatches = [];
@@ -442,7 +442,7 @@ function normalizeMatch(raw) {
     awayScore: pick(raw, ["Away Score", "AwayScore", "away_score"], null),
     status: String(pick(raw, ["Status", "status"], "NS")).trim(),
     date: pick(raw, ["Match Date", "MatchDate", "match_date", "date"], ""),
-homeLogo: pick(raw, ["Home Logo", "HomeLogo", "home_logo", "homelogo", "homeLogo"], ""),
+    homeLogo: pick(raw, ["Home Logo", "HomeLogo", "home_logo", "homelogo", "homeLogo"], ""),
     awayLogo: pick(raw, ["Away Logo", "AwayLogo", "away_logo", "awaylogo", "awayLogo"], "")
 
   };
