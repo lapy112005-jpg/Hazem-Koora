@@ -385,6 +385,25 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
       </div>
     </div>
 
+    // فريق المضيف (Home Team)
+<div class="result-team">
+  <div class="result-badge">
+    ${m.homeLogo 
+      ? `<img src="${escapeHtml(m.homeLogo)}" alt="${escapeHtml(m.home)}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.parentElement.innerText='${initials(m.home)}';" />`
+      : initials(m.home)}
+  </div>
+  <span title="${escapeHtml(m.home)}">${escapeHtml(m.home)}</span>
+</div>
+
+// فريق الضيف (Away Team)
+<div class="result-team away">
+  <div class="result-badge">
+    ${m.awayLogo 
+      ? `<img src="${escapeHtml(m.awayLogo)}" alt="${escapeHtml(m.away)}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.parentElement.innerText='${initials(m.away)}';" />`
+      : initials(m.away)}
+  </div>
+  <span title="${escapeHtml(m.away)}">${escapeHtml(m.away)}</span>
+</div>
     <div class="featured-scroller" id="featuredScroller">
       <!-- filled by JS -->
     </div>
@@ -548,6 +567,7 @@ function renderFeatured(matches) {
 /* ============================================================
    RENDER: results grouped by league
    ============================================================ */
+   
 function renderLeagueGroups(matches) {
   const container = document.getElementById("leaguesContainer");
   const metaEl = document.getElementById("resultsMeta");
