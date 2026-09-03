@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PITCHLINE — نتائج مباشرة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -207,7 +206,10 @@ button{font-family:inherit; cursor:pointer;}
   border:1px solid var(--glass-border);
   display:flex; align-items:center; justify-content:center;
   font-family:var(--font-display); font-weight:700; font-size:15px; color:var(--text-mid);
+  overflow:hidden; flex-shrink:0;
 }
+.team-badge img{width:100%; height:100%; object-fit:contain; padding:7px;}
+.badge-fallback{font-family:var(--font-display); font-weight:700; line-height:1;}
 .team-name{font-size:12.5px; font-weight:600; text-align:center; color:var(--text-hi); max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .score-block{display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:30px; font-weight:700; padding:0 6px;}
 .score-block .sep{color:var(--text-lo); font-size:18px; font-weight:500;}
@@ -265,7 +267,9 @@ button{font-family:inherit; cursor:pointer;}
   background:var(--navy-800); border:1px solid var(--glass-border);
   display:flex; align-items:center; justify-content:center;
   font-size:10.5px; font-weight:700; color:var(--text-mid);
+  overflow:hidden;
 }
+.result-badge img{width:100%; height:100%; object-fit:contain; padding:3px;}
 .result-score{
   font-family:var(--font-display); font-weight:700; font-size:15px;
   display:flex; align-items:center; gap:6px; justify-content:center; min-width:60px;
@@ -312,7 +316,7 @@ button{font-family:inherit; cursor:pointer;}
 
 /* ---------- Footer ---------- */
 footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
-.footer-inner{display:flex; justify-content:center; flex-wrap:wrap; gap:10px; color:var(--text-lo); font-size:17px;}
+.footer-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; color:var(--text-lo); font-size:12.5px;}
 
 /* ---------- Toast notifications (bottom-left, floating) ---------- */
 .toast-stack{
@@ -357,7 +361,7 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
         <svg viewBox="0 0 24 24" fill="none" stroke="#080b16" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M8.5 15.5l-2 2"/></svg>
       </div>
       <div class="brand-text">
-        <b>Hazem Koora</b>
+        <b>PITCHLINE</b>
         <span>نتائج مباشرة لحظة بلحظة</span>
       </div>
     </div>
@@ -385,25 +389,6 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
       </div>
     </div>
 
-    // فريق المضيف (Home Team)
-<div class="result-team">
-  <div class="result-badge">
-    ${m.homeLogo 
-      ? `<img src="${escapeHtml(m.homeLogo)}" alt="${escapeHtml(m.home)}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.parentElement.innerText='${initials(m.home)}';" />`
-      : initials(m.home)}
-  </div>
-  <span title="${escapeHtml(m.home)}">${escapeHtml(m.home)}</span>
-</div>
-
-// فريق الضيف (Away Team)
-<div class="result-team away">
-  <div class="result-badge">
-    ${m.awayLogo 
-      ? `<img src="${escapeHtml(m.awayLogo)}" alt="${escapeHtml(m.away)}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.parentElement.innerText='${initials(m.away)}';" />`
-      : initials(m.away)}
-  </div>
-  <span title="${escapeHtml(m.away)}">${escapeHtml(m.away)}</span>
-</div>
     <div class="featured-scroller" id="featuredScroller">
       <!-- filled by JS -->
     </div>
@@ -423,7 +408,8 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
 
 <footer>
   <div class="wrap footer-inner">
-    <span>Developed by eng. Hazem Mohamed</span>
+    <span>PITCHLINE © 2026 — بيانات لحظية عبر Webhook</span>
+    <span>مصدر البيانات: n8n Automation</span>
   </div>
 </footer>
 
@@ -433,7 +419,7 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
 /* ============================================================
    CONFIG
    ============================================================ */
-const WEBHOOK_URL = "https://hazem-n8n-gomma.app.n8n.cloud/webhook/e10df1cf-9fb5-4456-a561-3339ed5f85c2";
+const WEBHOOK_URL = "https://hazem-n8n-gomma.app.n8n.cloud/webhook-test/get-matches";
 const REFRESH_INTERVAL_MS = 30000; // 30s auto refresh
 
 let currentMatches = [];
@@ -454,16 +440,16 @@ function pick(obj, keys, fallback) {
 
 function normalizeMatch(raw) {
   return {
-    id: String(pick(raw, ["id", "Match ID", "match_id"], cryptoRandomId())),
+    id: String(pick(raw, ["id", "Match ID", "MatchID", "match_id"], cryptoRandomId())),
     league: pick(raw, ["league", "League"], "دوري غير معروف"),
-    home: pick(raw, ["homeTeam", "home", "Home Team", "HomeTeam"], "فريق مضيف"),
-    away: pick(raw, ["awayTeam", "away", "Away Team", "AwayTeam"], "فريق ضيف"),
-    homeScore: pick(raw, ["homeScore", "Home Score", "home_score"], null),
-    awayScore: pick(raw, ["awayScore", "Away Score", "away_score"], null),
+    home: pick(raw, ["homeTeam", "home", "Home Team", "HomeTeam", "home_team"], "فريق مضيف"),
+    away: pick(raw, ["awayTeam", "away", "Away Team", "AwayTeam", "away_team"], "فريق ضيف"),
+    homeScore: pick(raw, ["homeScore", "Home Score", "HomeScore", "home_score"], null),
+    awayScore: pick(raw, ["awayScore", "Away Score", "AwayScore", "away_score"], null),
     status: String(pick(raw, ["status", "Status"], "NS")).trim(),
-    date: pick(raw, ["matchDate", "Match Date", "date"], ""),
-    homeLogo: pick(raw, ["homeLogo", "Home Logo", "homelogo"], ""),
-    awayLogo: pick(raw, ["awayLogo", "Away Logo", "awaylogo"], "")
+    date: pick(raw, ["matchDate", "Match Date", "MatchDate", "match_date", "date"], ""),
+    homeLogo: pick(raw, ["homeLogo", "Home Logo", "HomeLogo", "home_logo", "homelogo"], ""),
+    awayLogo: pick(raw, ["awayLogo", "Away Logo", "AwayLogo", "away_logo", "awaylogo"], "")
   };
 }
 
@@ -483,6 +469,18 @@ function classifyStatus(status) {
 
 function initials(name) {
   return (name || "?").trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+/* Renders a team badge: uses the logo image from the API when available,
+   falls back to team initials if the logo URL is missing or fails to load. */
+function teamBadgeHtml(name, logoUrl) {
+  const fallback = `<span class="badge-fallback">${initials(name)}</span>`;
+  if (!logoUrl) return fallback;
+  const safeUrl = escapeHtml(logoUrl);
+  const safeName = escapeHtml(name);
+  // onerror swaps the broken image for the initials fallback, in place, without JS re-render
+  return `<img src="${safeUrl}" alt="${safeName}" loading="lazy"
+            onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'badge-fallback',textContent:'${initials(name).replace(/'/g, "\\'")}'}))">`;
 }
 
 function scoreDisplay(v) {
@@ -542,7 +540,7 @@ function renderFeatured(matches) {
         </div>
         <div class="teams-row">
           <div class="team">
-            <div class="team-badge">${initials(m.home)}</div>
+            <div class="team-badge">${teamBadgeHtml(m.home, m.homeLogo)}</div>
             <div class="team-name" title="${escapeHtml(m.home)}">${escapeHtml(m.home)}</div>
           </div>
           <div class="score-block num ${scoreClass}">
@@ -551,7 +549,7 @@ function renderFeatured(matches) {
             <span>${scoreDisplay(m.awayScore)}</span>
           </div>
           <div class="team">
-            <div class="team-badge">${initials(m.away)}</div>
+            <div class="team-badge">${teamBadgeHtml(m.away, m.awayLogo)}</div>
             <div class="team-name" title="${escapeHtml(m.away)}">${escapeHtml(m.away)}</div>
           </div>
         </div>
@@ -567,7 +565,6 @@ function renderFeatured(matches) {
 /* ============================================================
    RENDER: results grouped by league
    ============================================================ */
-   
 function renderLeagueGroups(matches) {
   const container = document.getElementById("leaguesContainer");
   const metaEl = document.getElementById("resultsMeta");
@@ -596,12 +593,12 @@ function renderLeagueGroups(matches) {
         <div class="result-row">
           <div class="result-time">${formatTime(m.date)}</div>
           <div class="result-team">
-            <div class="result-badge">${initials(m.home)}</div>
+            <div class="result-badge">${teamBadgeHtml(m.home, m.homeLogo)}</div>
             <span title="${escapeHtml(m.home)}">${escapeHtml(m.home)}</span>
           </div>
           <div class="result-score num">${scoreDisplay(m.homeScore)} : ${scoreDisplay(m.awayScore)}</div>
           <div class="result-team away">
-            <div class="result-badge">${initials(m.away)}</div>
+            <div class="result-badge">${teamBadgeHtml(m.away, m.awayLogo)}</div>
             <span title="${escapeHtml(m.away)}">${escapeHtml(m.away)}</span>
           </div>
           <div class="result-status"><span class="status-badge ${badgeClass}">${dotHtml}${st.label}</span></div>
