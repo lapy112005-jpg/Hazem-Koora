@@ -419,7 +419,7 @@ footer{padding:30px 0 60px; border-top:1px solid var(--line); margin-top:20px;}
    CONFIG
    ============================================================ */
 const WEBHOOK_URL = "https://hwwzwwm.app.n8n.cloud/webhook/a8b76a4c-69be-4080-a334-ed48e1b63a2a";
-const REFRESH_INTERVAL_MS = 30000*100; // 30s auto refresh
+const REFRESH_INTERVAL_MS = 30000*100*1.5; // 30s auto refresh
 
 let currentMatches = [];
 let prevMatchesById = new Map();
@@ -850,7 +850,7 @@ startAutoRefresh();
 showToast({
   type: "info",
   title: "مرحباً بك 👋",
-  message: "يتم تحديث النتائج تلقائياً كل 30 ثانية.",
+  message: "يتم تحديث النتائج تلقائياً كل ساعه و ربع.",
   timeout: 4500
 });
 </script>
