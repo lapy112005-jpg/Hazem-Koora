@@ -437,18 +437,49 @@ function pick(obj, keys, fallback) {
   return fallback;
 }
 
+/* Reads a nested object/team field that might be either:
+   - a plain string  (old Sheets-flattened format: "Real Madrid")
+   - a football-data.org object ({ name, shortName, tla, crest, ... }) */
+function pickTeamField(val, subKeys, fallback) {
+  if (val === undefined || val === null || val === "") return fallback;
+  if (typeof val === "string") return val;
+  if (typeof val === "object") return pick(val, subKeys, fallback);
+  return fallback;
+}
+
 function normalizeMatch(raw) {
+  const home = raw.homeTeam ?? {};
+  const away = raw.awayTeam ?? {};
+  const score = raw.score ?? {};
+  const fullTime = score.fullTime ?? {};
+
+  // score: prefer football-data.org's nested score.fullTime.{home,away},
+  // fall back to the old flat Sheets-style keys
+  const homeScore = (fullTime.home !== undefined && fullTime.home !== null)
+    ? fullTime.home
+    : pick(raw, ["homeScore", "Home Score", "HomeScore", "home_score"], null);
+  const awayScore = (fullTime.away !== undefined && fullTime.away !== null)
+    ? fullTime.away
+    : pick(raw, ["awayScore", "Away Score", "AwayScore", "away_score"], null);
+
   return {
     id: String(pick(raw, ["id", "Match ID", "MatchID", "match_id"], cryptoRandomId())),
-    league: pick(raw, ["league", "League"], "دوري غير معروف"),
-    home: pick(raw, ["homeTeam", "home", "Home Team", "HomeTeam", "home_team"], "فريق مضيف"),
-    away: pick(raw, ["awayTeam", "away", "Away Team", "AwayTeam", "away_team"], "فريق ضيف"),
-    homeScore: pick(raw, ["homeScore", "Home Score", "HomeScore", "home_score"], null),
-    awayScore: pick(raw, ["awayScore", "Away Score", "AwayScore", "away_score"], null),
-    status: String(pick(raw, ["status", "Status"], "NS")).trim(),
-    date: pick(raw, ["matchDate", "Match Date", "MatchDate", "match_date", "date"], ""),
-    homeLogo: pick(raw, ["homeLogo", "Home Logo", "HomeLogo", "home_logo", "homelogo"], ""),
-    awayLogo: pick(raw, ["awayLogo", "Away Logo", "AwayLogo", "away_logo", "awaylogo"], "")
+    league: pick(raw, ["league", "League"], null)
+      || pickTeamField(raw.competition, ["name"], null)
+      || pickTeamField(raw.area, ["name"], null)
+      || "دوري غير معروف",
+    home: pickTeamField(home, ["name", "shortName", "tla"], null)
+      || pick(raw, ["home", "Home Team", "HomeTeam", "home_team"], "فريق مضيف"),
+    away: pickTeamField(away, ["name", "shortName", "tla"], null)
+      || pick(raw, ["away", "Away Team", "AwayTeam", "away_team"], "فريق ضيف"),
+    homeScore,
+    awayScore,
+    status: String(pick(raw, ["status", "Status"], "SCHEDULED")).trim(),
+    date: pick(raw, ["utcDate", "matchDate", "Match Date", "MatchDate", "match_date", "date"], ""),
+    homeLogo: pickTeamField(home, ["crest"], null)
+      || pick(raw, ["homeLogo", "Home Logo", "HomeLogo", "home_logo", "homelogo"], ""),
+    awayLogo: pickTeamField(away, ["crest"], null)
+      || pick(raw, ["awayLogo", "Away Logo", "AwayLogo", "away_logo", "awaylogo"], "")
   };
 }
 
@@ -456,18 +487,30 @@ function cryptoRandomId() {
   return "m_" + Math.random().toString(36).slice(2, 10);
 }
 
-/* status classification: FT, NS, or a live minute (numeric-ish string) */
+/* status classification — supports football-data.org v4 status codes
+   (SCHEDULED/TIMED/IN_PLAY/PAUSED/FINISHED/POSTPONED/SUSPENDED/CANCELLED/AWARDED)
+   and stays backward-compatible with the old Sheets format (FT/NS/minute). */
 function classifyStatus(status) {
   const s = (status || "").trim().toUpperCase();
-  if (s === "FT") return { kind: "ft", label: "انتهت" };
-  if (s === "NS") return { kind: "ns", label: "لم تبدأ" };
+
+  if (s === "FT" || s === "FINISHED" || s === "AWARDED") return { kind: "ft", label: "انتهت" };
+  if (s === "IN_PLAY") return { kind: "live", label: "مباشر الآن" };
+  if (s === "PAUSED") return { kind: "live", label: "استراحة" };
+  if (s === "NS" || s === "SCHEDULED" || s === "TIMED") return { kind: "ns", label: "لم تبدأ" };
+  if (s === "POSTPONED") return { kind: "ns", label: "مؤجلة" };
+  if (s === "SUSPENDED") return { kind: "ns", label: "موقوفة" };
+  if (s === "CANCELLED") return { kind: "ns", label: "ملغاة" };
+
+  // legacy: bare numeric minute string, e.g. "45" or "45'"
   const numeric = s.replace("'", "").replace("+", "");
   if (/^\d+$/.test(numeric)) return { kind: "live", label: `الدقيقة ${numeric}'` };
+
   return { kind: "ns", label: s || "—" };
 }
 
 function initials(name) {
-  return (name || "?").trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  const safeName = typeof name === 'string' ? name : String(name || "?");
+  return safeName.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
 /* Renders a team badge: uses the logo image from the API when available,
